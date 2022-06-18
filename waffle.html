@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Waffle Unlimited</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+
+
+    <style>
+        .tile {
+            text-align: center;
+            position: fixed;
+
+            color: white;
+            font-weight: 700;
+            line-height: 0px;
+
+            border-radius: 25%;
+            border-width: 4px;
+            border-style: solid;
+
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            touch-action: none;
+        }
+    </style>
+
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-505T122RD5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-505T122RD5');
+    </script>
+</head>
+
+<body>
+    <h1 class="text-center pt-5">Waffle Unlimited</h1>
+    <h6 class="text-center">Based on <a href="https://wafflegame.net">wafflegame.net</a></h6>
+
+    <div id="loadingDiv" class="text-center py-5">
+        <h3>Generating Waffles...</h3>
+    </div>
+    <div hidden="true" id="mainGameBoard"></div>
+    <div id="gameInfoPanel" class="clearfix">
+        <h2 id="swapCounter" class="text-center pt-3">Swaps Remaining:</h2>
+        <div hidden="true" id="endGameControls" class="container text-center pt-3">
+            <button type="Play Again" onclick="startNewGame()" class="btn btn-primary btn-lg">Play Again</button>
+        </div>
+        <h6 style="color:#2a2a2a;font-weight:400;" class="text-center pt-3 clearfix">
+            Created by <a href="https://noahcharlton.com" target="_blank">Noah Charlton</a> |
+            <a href="https://github.com/ncharlton02/ncharlton02.github.io/issues/new" target="_blank">Submit Bug</a>
+        </h6>
+    </div>
+
+    <script>
+        const YELLOW_TILE_COLOR = "#e6c619"
+        let loadingDiv = document.getElementById("loadingDiv");
+        let gameBoard = document.getElementById("mainGameBoard");
+        let swapCounter = document.getElementById("swapCounter");
+        let endGameControls = document.getElementById("endGameControls");
+        let gameInfoPanel = document.getElementById("gameInfoPanel");
+        let tiles = {};
+        let tileDragging = null;
+        let tileHovering = null;
+        let mouseX = 0;
+        let mouseY = 0;
+        let waffles = [];
+        let currWaffle = null;
+        let swapsRemaining = 0;
+        let usingTouch = false;
+        let gameOver = false;
+
+        function loadWaffles() {
+            var client = new XMLHttpRequest();
+            client.open('GET', 'waffles.txt');
+            client.onreadystatechange = function () {
+                if (client.readyState === 4) {
+                    if (client.status === 200 || client.status == 0) {
+                        let waffleText = client.responseText;
+                        let lines = waffleText.split('\n');
+
+                        for (let i = 0; i < lines.length; i++) {
+                            let line = lines[i];
+                            let words = line.split(',');
+
+                            if (words.length == 6) {
+                                waffles.push({
+                                    top: words[0].trim().toUpperCase(),
+                                    left: words[1].trim().toUpperCase(),
+                                    right: words[2].trim().toUpperCase(),
+                                    bottom: words[3].trim().toUpperCase(),
+                                    across: words[4].trim().toUpperCase(),
+                                    down: words[5].trim().toUpperCase(),
+                                });
+                            } else {
+                                console.log("Invalid line: ", line)
+                            }
+                        }
+
+                        console.log("loaded " + waffles.length + " waffles")
+                        onPostGameLoad();
+                    } else {
+                        console.error("unable to load waffle file");
+                    }
+                }
+            }
+            client.send();
+        }
+
+        function onPostGameLoad() {
+            for (let x = 0; x < 5; x++) {
+                for (let y = 0; y < 5; y++) {
+                    if (!((x == 1 || x == 3) && (y == 1 || y == 3))) {
+                        createTile(x, y);
+                    }
+                }
+            }
+            loadingDiv.hidden = true;
+            gameBoard.hidden = false;
+            startNewGame();
+            requestAnimationFrame(gameUpdate);
+        }
+
+        function removeAny(arr) {
+            let index = Math.floor(Math.random() * arr.length);
+
+            return arr.splice(index, 1)[0];
+        }
+
+        function startNewGame() {
+            swapsRemaining = 15;
+            gameOver = false;
+            currWaffle = waffles[Math.floor(Math.random() * waffles.length)];
+
+            function setupTile(x, y, c) {
+                let tile = getTile(x, y);
+                tile.innerHTML = "<p>" + c + "</p>";
+                tile.setAttribute("correct-char", c);
+                tile.setAttribute("visible-char", c);
+            }
+
+            // Setup top
+            setupTile(0, 0, currWaffle.top[0]);
+            setupTile(1, 0, currWaffle.top[1]);
+            setupTile(2, 0, currWaffle.top[2]);
+            setupTile(3, 0, currWaffle.top[3]);
+            setupTile(4, 0, currWaffle.top[4]);
+
+            // Setup bottom 
+            setupTile(0, 4, currWaffle.bottom[0]);
+            setupTile(1, 4, currWaffle.bottom[1]);
+            setupTile(2, 4, currWaffle.bottom[2]);
+            setupTile(3, 4, currWaffle.bottom[3]);
+            setupTile(4, 4, currWaffle.bottom[4]);
+
+            // Setup left 
+            setupTile(0, 1, currWaffle.left[1]);
+            setupTile(0, 2, currWaffle.left[2]);
+            setupTile(0, 3, currWaffle.left[3]);
+
+            // Setup right 
+            setupTile(4, 1, currWaffle.right[1]);
+            setupTile(4, 2, currWaffle.right[2]);
+            setupTile(4, 3, currWaffle.right[3]);
+
+            // Setup middle
+            setupTile(2, 1, currWaffle.down[1]);
+            setupTile(2, 2, currWaffle.down[2]);
+            setupTile(2, 3, currWaffle.down[3]);
+            setupTile(1, 2, currWaffle.across[1]);
+            setupTile(3, 2, currWaffle.across[3]);
+
+            let swappableTiles = [];
+            for (let x = 0; x < 5; x++) {
+                for (let y = 0; y < 5; y++) {
+                    if (!((x == 1 || x == 3) && (y == 1 || y == 3))) {
+                        swappableTiles.push({ x: x, y: y, c: getTile(x, y).getAttribute("correct-char") });
+                    }
+                }
+            }
+
+            let tilesRemaining = swappableTiles.map(a => { return { ...a } });
+            let tilePairs = [];
+            while (tilesRemaining.length > 3) {
+                let t1 = removeAny(tilesRemaining);
+                let t2 = removeAny(tilesRemaining);
+                tilePairs.push([t1, t2]);
+
+                if (t1.c == t2.c) {
+                    tilesRemaining = swappableTiles.map(a => { return { ...a } });
+                    tilePairs = [];
+                }
+            }
+
+            for (let i = 0; i < tilePairs.length; i++) {
+                let tilePair = tilePairs[i];
+                let tile0 = getTile(tilePair[0].x, tilePair[0].y);
+                let tile1 = getTile(tilePair[1].x, tilePair[1].y);
+
+                swapTiles(tile0, tile1);
+            }
+
+            let yellowCount = 0;
+            Object.keys(tiles).forEach(function (tileKey) {
+                let tile = tiles[tileKey];
+
+                if (determineTileColor(tile) == YELLOW_TILE_COLOR) {
+                    yellowCount++;
+                }
+            });
+
+            if (yellowCount > 5) {
+                startNewGame();
+            }
+        }
+
+        function tilePosToIndex(x, y) {
+            if (typeof x == "string" || typeof y == "string") {
+                console.error("String passed to tilePosToIndex");
+            }
+            return x * 5 + y;
+        }
+
+        function getTile(x, y) {
+            if (x < 0 || y < 0 || x >= 5 || y >= 5) {
+                console.error("Invalid tile");
+                return null;
+            }
+            return tiles[tilePosToIndex(x, y)]
+        }
+
+        function createTile(x, y) {
+            let div = document.createElement("div");
+            div.className = "tile m-3";
+            div.innerHTML = "<p></p>"
+            div.setAttribute("waffle-x", x);
+            div.setAttribute("waffle-y", y);
+            gameBoard.appendChild(div);
+
+            tiles[tilePosToIndex(x, y)] = div;
+        }
+
+        function determineGameBoardSize() {
+            let boundingRect = gameBoard.getBoundingClientRect();
+            let infoPanelBBox = gameInfoPanel.getBoundingClientRect();
+            let height = (window.innerHeight - boundingRect.top - infoPanelBBox.height) * 0.8;
+            let width = window.innerWidth * 0.8;
+
+            return Math.min(width, height);
+        }
+
+        function determinePossibleLetters(startX, startY, endX, endY, consoleEnabled) {
+            let possibleLetters = {};
+
+            for (let x = startX; x <= endX; x++) {
+                for (let y = startY; y <= endY; y++) {
+                    if (consoleEnabled) {
+                        console.log("Checking (" + x + ", " + y + ")")
+                    }
+                    let tile = getTile(x, y);
+                    let visibleChar = tile.getAttribute("visible-char");
+                    let correctChar = tile.getAttribute("correct-char");
+
+                    if (visibleChar != correctChar) {
+                        if (consoleEnabled) {
+                            console.log("missing " + correctChar + " at (" + x + ", " + y + ")")
+                        }
+                        if (possibleLetters[correctChar] != undefined) {
+                            possibleLetters[correctChar] += 1;
+                        } else {
+                            possibleLetters[correctChar] = 1;
+                        }
+                    }
+                }
+            }
+
+
+            return possibleLetters;
+        }
+
+        function countVisibleLetters(startX, startY, endX, endY, consoleEnabled) {
+            let visibleLetters = {};
+
+            for (let x = startX; x <= endX; x++) {
+                for (let y = startY; y <= endY; y++) {
+                    if (consoleEnabled) {
+                        console.log("Counting (" + x + ", " + y + ")")
+                    }
+                    let tile = getTile(x, y);
+                    let visibleChar = tile.getAttribute("visible-char");
+
+                    if (visibleLetters[visibleChar] != undefined) {
+                        visibleLetters[visibleChar] += 1;
+                    } else {
+                        visibleLetters[visibleChar] = 1;
+                    }
+                }
+            }
+
+
+            return visibleLetters;
+        }
+
+        function determineTileColor(tile, consoleEnabled) {
+            let waffleX = parseInt(tile.getAttribute("waffle-x"));
+            let waffleY = parseInt(tile.getAttribute("waffle-y"));
+            let visibleChar = tile.getAttribute("visible-char");
+
+            if (isTileCorrect(tile)) {
+                return "green";
+            } else if (gameOver) {
+                return "red";
+            }
+
+            let isYellow = false;
+            if (waffleX % 2 == 0) { // It is a column
+                let possibleLetters = determinePossibleLetters(waffleX, 0, waffleX, 4, consoleEnabled);
+
+                if (consoleEnabled) {
+                    console.log("visible letters in column: ", possibleLetters);
+                }
+
+                if (possibleLetters[visibleChar] != undefined) {
+                    let usedLetters = countVisibleLetters(waffleX, 0, waffleX, waffleY - 1, consoleEnabled);
+
+                    if (consoleEnabled) {
+                        console.log("used letters in column ", usedLetters)
+                    }
+
+                    if (usedLetters[visibleChar] != undefined) {
+                        possibleLetters[visibleChar] -= usedLetters[visibleChar];
+                    }
+
+                    if (possibleLetters[visibleChar] > 0) {
+                        if (consoleEnabled) {
+                            console.log("is yellow because column");
+                        }
+                        isYellow = true;
+                    }
+                }
+            }
+
+            if (waffleY % 2 == 0) { // It is a row
+                let possibleLetters = determinePossibleLetters(0, waffleY, 4, waffleY, consoleEnabled);
+
+                if (consoleEnabled) {
+                    console.log("visible letters in row: ", possibleLetters);
+                }
+
+                if (possibleLetters[visibleChar] != undefined) {
+                    let usedLetters = countVisibleLetters(0, waffleY, waffleX - 1, waffleY, consoleEnabled);
+
+                    if (consoleEnabled) {
+                        console.log("used letters in row ", usedLetters)
+                    }
+
+                    if (usedLetters[visibleChar] != undefined) {
+                        possibleLetters[visibleChar] -= usedLetters[visibleChar];
+                    }
+
+                    if (possibleLetters[visibleChar] > 0) {
+                        if (consoleEnabled) {
+                            console.log("is yellow because row");
+                        }
+                        isYellow = true;
+                    }
+                }
+            }
+
+            if (isYellow) {
+                return "#e6c619";
+            } else {
+                return "gray";
+            }
+        }
+
+        function areAllTilesCorrect() {
+            let allCorrect = true;
+            Object.keys(tiles).forEach(function (tileKey) {
+                let tile = tiles[tileKey];
+
+                if (tile.getAttribute("visible-char") != tile.getAttribute("correct-char")) {
+                    allCorrect = false;
+                }
+            });
+
+            return allCorrect;
+        }
+
+        function gameUpdate() {
+            let tileGap = 8;
+            let gameBoardSize = determineGameBoardSize();
+            gameBoard.style.minHeight = (gameBoardSize + 30) + "px"
+            let tileSize = (gameBoardSize - (6 * tileGap)) / 5;
+            let offsetX = (window.innerWidth / 2) - (gameBoardSize / 2) - (tileSize / 4);
+            swapCounter.innerHTML = "Swaps Remaining: " + swapsRemaining;
+            endGameControls.hidden = !gameOver;
+
+            if (!gameOver) {
+                gameOver = swapsRemaining <= 0 || areAllTilesCorrect();
+            }
+
+            // Determine hover
+            tileHovering = null;
+            if (tileDragging != null && !gameOver) {
+                Object.keys(tiles).forEach(function (tileKey) {
+                    let tile = tiles[tileKey];
+                    let bbox = tile.getBoundingClientRect();
+
+                    if (tile != tileDragging && !isTileCorrect(tile)) {
+                        if (bbox.x < mouseX && bbox.x + bbox.width > mouseX) {
+                            if (bbox.y < mouseY && bbox.y + bbox.height > mouseY) {
+                                tileHovering = tile;
+                            }
+                        }
+                    }
+                });
+            }
+
+            Object.keys(tiles).forEach(function (tileKey) {
+                let tile = tiles[tileKey];
+                let waffleX = parseInt(tile.getAttribute("waffle-x"));
+                let waffleY = parseInt(tile.getAttribute("waffle-y"));
+                let tileX = tileGap + waffleX * (tileSize + tileGap) + offsetX;
+                let tileY = tileGap + waffleY * (tileSize + tileGap);
+                let borderColor = "black";
+                let zIndex = "auto";
+                let backgroundColor = determineTileColor(tile);
+                let scale = 1.0;
+
+                if (gameOver) {
+                    tile.innerHTML = "<p>" + tile.getAttribute("correct-char") + "</p>";
+                }
+
+                if (tile == tileDragging) {
+                    let gameBoardBBox = gameBoard.getBoundingClientRect();
+                    tileX = mouseX - gameBoardBBox.left - tileSize / 2;
+                    tileY = mouseY - gameBoardBBox.top - tileSize / 2;
+                    zIndex = "1000";
+
+                    if (usingTouch) {
+                        scale = 1.5;
+                        tileX -= tileSize / 2;
+                        tileY -= tileSize / 2;
+                    }
+                }
+
+                if (tile == tileHovering) {
+                    borderColor = "red";
+                }
+
+                var cssText = "transform:translate(" + tileX + "px, " + tileY + "px) scale(" + scale + ");";
+                cssText += "min-width:" + tileSize + "px; min-height: " + tileSize + "px;";
+                cssText += "min-width:" + tileSize + "px; min-height: " + tileSize + "px;";
+                cssText += "font-size: " + (tileSize * .6) + "px;";
+                cssText += "padding-top: " + (tileSize / 2.5) + "px;";
+                cssText += "border-color:" + borderColor + ";";
+                cssText += "background-color:" + backgroundColor + ";"
+                cssText += "z-index:" + zIndex + ";";
+
+                if (!isTileCorrect(tile)) {
+                    cssText += "cursor: pointer;"
+                }
+
+                tile.style.cssText = cssText;
+            });
+
+            requestAnimationFrame(gameUpdate);
+        }
+
+        function isTileCorrect(tile) {
+            return tile.getAttribute("correct-char") == tile.getAttribute("visible-char");
+        }
+
+        function onMouseDown(event) {
+            mouseX = event.x;
+            mouseY = event.y;
+
+            if (!gameOver) {
+                Object.keys(tiles).forEach(function (tileKey) {
+                    let tile = tiles[tileKey];
+                    let bbox = tile.getBoundingClientRect();
+
+                    if (!isTileCorrect(tile)) {
+                        if (bbox.x < event.x && bbox.x + bbox.width > event.x) {
+                            if (bbox.y < event.y && bbox.y + bbox.height > event.y) {
+                                tileDragging = tile;
+                                return;
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        function swapTiles(origTile, newTile) {
+            let origWaffleX = parseInt(origTile.getAttribute("waffle-x"));
+            let origWaffleY = parseInt(origTile.getAttribute("waffle-y"));
+            let origChar = origTile.getAttribute("correct-char");
+            let newWaffleX = parseInt(newTile.getAttribute("waffle-x"));
+            let newWaffleY = parseInt(newTile.getAttribute("waffle-y"));
+            let newChar = newTile.getAttribute("correct-char");
+
+            origTile.setAttribute("waffle-x", newWaffleX);
+            origTile.setAttribute("waffle-y", newWaffleY);
+            origTile.setAttribute("correct-char", newChar);
+            newTile.setAttribute("waffle-x", origWaffleX);
+            newTile.setAttribute("waffle-y", origWaffleY);
+            newTile.setAttribute("correct-char", origChar);
+
+            tiles[tilePosToIndex(origWaffleX, origWaffleY)] = newTile;
+            tiles[tilePosToIndex(newWaffleX, newWaffleY)] = origTile;
+        }
+
+        function onMouseUp(event) {
+            if (tileHovering != null && tileDragging != null && !gameOver) {
+                swapsRemaining--;
+                swapTiles(tileDragging, tileHovering);
+            }
+            tileHovering = null;
+            tileDragging = null;
+        }
+
+        function onMouseMove(event) {
+            mouseX = event.x;
+            mouseY = event.y;
+        }
+
+        function toMouseEvent(event) {
+            event.x = event.targetTouches[0].clientX;
+            event.y = event.targetTouches[0].clientY;
+            return event;
+        }
+
+        window.addEventListener('mouseup', onMouseUp);
+        window.addEventListener('mousedown', onMouseDown);
+        window.addEventListener('mousemove', onMouseMove);
+
+        window.addEventListener('touchend', function (event) {
+            usingTouch = true;
+            onMouseUp(event);
+
+        });
+        window.addEventListener('touchcancel', function (event) {
+            usingTouch = true;
+            onMouseUp(event);
+        });
+        window.addEventListener('touchstart', function (event) {
+            usingTouch = true;
+            if (event.targetTouches.length > 0) {
+                onMouseDown(toMouseEvent(event));
+            }
+        });
+        window.addEventListener('touchmove', function (event) {
+            usingTouch = true;
+            if (event.targetTouches.length > 0) {
+                onMouseMove(toMouseEvent(event));
+            }
+        });
+
+        loadWaffles();
+    </script>
+</body>
+
+</html>
