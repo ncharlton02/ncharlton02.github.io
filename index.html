@@ -17,6 +17,15 @@
 
         gtag('config', 'G-505T122RD5');
     </script>
+    <style>
+        .cv-card {
+            max-width: min(90%, 40em);
+        }
+
+        .cv-card .card-body {
+            padding: 8px;
+        }
+    </style>
 </head>
 
 <body>
@@ -30,7 +39,7 @@
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
                     <a class="nav-link" href="#">Home</a>
-                    <a class="nav-link" href="resumes/resume_current.pdf" target="_blank">Resume</a>
+                    <a class="nav-link" href="files/resume.pdf" target="_blank">Resume</a>
                 </div>
             </div>
         </div>
@@ -39,7 +48,7 @@
     <div class="container-lg mx-auto" style="max-width:900px">
         <div class="row">
             <div class="col-sm my-auto pt-5">
-                <div class="container" style="max-width:300px">
+                <div class="container" style="max-width:350px">
                     <div class="row">
                         <img src="photo.png" class="img-thumbnail rounded-circle my-3" style="border: 0;"
                             alt="Personal Photo">
@@ -65,10 +74,22 @@
             </div>
             <div class="col-sm pt-5">
                 <h1>Noah Charlton</h1>
-                <p>Hi! I am a college student interested in programming, electronics, and robotics. </p>
+                <p>Hi! I am a student at Ohio State interested in programming, electronics, and robotics. </p>
                 <h3>Education</h3>
 
                 <div class="container">
+                    <div class="row">
+                        <div class="col-sm-auto">
+                            <img src="icon_education.svg">
+                        </div>
+                        <div class="col">
+                            <h5>The Ohio State University</h4>
+                                <ul class="list-unstyled">
+                                    <li>M.S. Computer Science and Engineering</li>
+                                    <li>Expected Graduation: May 2026</li>
+                                </ul>
+                        </div>
+                    </div>
                     <div class="row">
                         <div class="col-sm-auto">
                             <img src="icon_education.svg">
@@ -93,79 +114,142 @@
         </div>
         <div class="row">
             <div class="col">
-                <h3 class="text-center pt-5">Experience, Projects, and Awards</h3>
+                <h3 class="text-center pt-3">Work Experience</h3>
             </div>
         </div>
         <div class="row justify-content-center">
-            <div class="card my-3 mx-3" style="max-width: 260px;">
+            <div class="card my-1 cv-card">
                 <div class="card-body">
-                    <h5 class="card-title">Software Engineering Intern</h5>
+                    <h5 class="card-title">Battelle Memorial Institute</h5>
                     <p class="card-text">
-                        Since January 2023, I have been working at the Battelle Memorial Institute developing 
-                        software for complex embedded systems. 
+                        At Battelle, I develop software for complex embedded systems.
                     </p>
-                    <a href="https://www.battelle.org/markets/national-security/mission-solutions"
-                        class="btn btn-primary">Battelle Website</a>
+                    <p class="card-text">
+                        <strong>Role:</strong> Software Engineering Intern (Jan. 2023 - Present)
+                        <br>
+                        <strong>Awards:</strong> Outstanding Performance Award (x2)
+                    </p>
                 </div>
             </div>
-            <div class="card my-3 mx-3" style="max-width: 260px;">
-                <div class="card-body">
-                    <h5 class="card-title">Underwater Robotics</h5>
-                    <p class="card-text">
-                        I am a member of The Ohio State Underwater Robotics Team where I develop 
-                        firmware for our custom PCBs. 
-                    </p>
-                    <a href="https://github.com/osu-uwrt/titan_firmware"
-                        class="btn btn-primary my-2">Firmware GitHub Repo</a>
-                    <a href="https://org.osu.edu/osu-uwrt/"
-                        class="btn btn-primary">Team Website</a>
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center pt-3">Academic Research</h3>
                 </div>
             </div>
-            <div class="card my-3 mx-3" style="max-width: 260px;">
+            <div class="card my-1 cv-card">
                 <div class="card-body">
-                    <h5 class="card-title">Undergradute Research Assistant</h5>
+                    <h5 class="card-title">Programming Language and Software Systems Lab (Ohio State)</h5>
                     <p class="card-text">
-                        I worked for Dr. Gil Bohrer as an undergraduate research assistant. I
-                        resarched how to use machine learning to model water flux in Ohio Wetlands.
+                        I am currently studying under Dr. Michael Bond and his assisting his work on predicting
+                        unserializable behavior
+                        within weakly isolated data stores.
                     </p>
-                    <a href="https://ceg.osu.edu/ecohydrology-and-forest-meteorology-laboratory"
-                        class="btn btn-primary my-2">Bohrer Lab</a>
-                    <a href="summer2022_research_poster.pdf"
-                        class="btn btn-primary">Summer 2022 Poster</a>
+                    <p class="card-text">
+                        <!-- <strong>Publications:</strong> TBD (<a href="link_here">DOI</a>) -->
+                        <!-- <br> -->
+                        <strong>Lab Website:</strong> <a href="https://mdbond.github.io/plass.html">Link</a>
+                    </p>
                 </div>
             </div>
-            <div class="card my-3 mx-3" style="max-width: 260px;">
+            <div class="card my-1 cv-card">
                 <div class="card-body">
-                    <h5 class="card-title">FROS President</h5>
+                    <h5 class="card-title">Ecohydrology and Forest Meteorology Laboratory (Ohio State)</h5>
                     <p class="card-text">
-                        I currently serve as the President of the FIRST Alumni and Robotics at Ohio State (FROS). 
-                        My main initiative as FROS President is starting a new subteam to compete in the NASA Lunabotics Compeition.
-                        I also mentor the Columbus School For Girl's High School Robotics Team in my free time. 
+                        I worked under Dr. Gil Bohrer as an Undergraduate Researcher from April to December 2022. I used
+                        machine learning to model missing sensor data for Ohio Wetlands.
                     </p>
-                    <a href="https://org.osu.edu/firstrobotics/" class="btn btn-primary">FROS Website</a>
+                    <p class="card-text">
+                        <strong>Presentations:</strong> 2022 Summer Undergraduate Research Forum (<a
+                            href="files/summer2022_research_poster.pdf">PDF</a>)
+                        <br>
+                        <strong>Lab Website:</strong> <a
+                            href="https://ceg.osu.edu/ecohydrology-and-forest-meteorology-laboratory">Link</a>
+                    </p>
                 </div>
             </div>
-            <div class="card my-3 mx-3" style="max-width: 260px;">
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center pt-3">Extracurriculars</h3>
+                </div>
+            </div>
+            <div class="card my-1 cv-card">
                 <div class="card-body">
-                    <h5 class="card-title">Hack OHI/O Grand Prize Winner</h5>
+                    <h5 class="card-title"><i>FIRST</i> Alumni and Robotics at Ohio State (FROS)</h5>
+                    <p class="card-text">
+                        As a part of FROS, I build robots for the NASA Lunabotics Competition and the University Rover
+                        Challenge.
+                    </p>
+                    <p class="card-text" style="margin: 0px;">
+                        <strong>Roles:</strong>
+                    <ul style="margin:0px">
+                        <li>President (2023-2025)</li>
+                        <li>Executive Board Member (2021-2023)</li>
+                    </ul>
+                    <strong>Lunabotics Paper:</strong> <a href="files/lunabotics_paper.pdf">Link</a>
+                    </p>
+
+                </div>
+            </div>
+            <div class="card my-1 cv-card">
+                <div class="card-body">
+                    <h5 class="card-title">OSU Underwater Robotics Team</h5>
+                    <p class="card-text">
+                        I develop firmware for RP2040s on the team's custom PCBs.
+                    </p>
+                    <p class="card-text" style="margin: 0px;">
+                        <strong>Role:</strong> Electrical Team Member (2022-Present)
+                        <br>
+                        <strong>Repository:</strong> <a href="https://github.com/osu-uwrt/titan_firmware">Link</a>
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center pt-3">Volunteer Experience</h3>
+                </div>
+            </div>
+            <div class="card my-1 cv-card">
+                <div class="card-body">
+                    <h5 class="card-title">Robotics Team Mentor</h5>
+                    <p class="card-text">
+                        I have mentored the Columbus School For Girls' robotics team since 2021.
+                    </p>
+                    <p class="card-text" style="margin: 0px;">
+                        <strong>Team Instagram:</strong> <a href="https://www.instagram.com/firstrobotics677/">Link</a>
+                    </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <h3 class="text-center pt-3">Past Projects</h3>
+                </div>
+            </div>
+            <div class="card my-1 cv-card">
+                <div class="card-body">
+                    <h5 class="card-title">Hack OHI/O 2021 Grand Prize Winner</h5>
                     <p class="card-text">
                         I worked in a team of 4 that won the Grand Prize at Ohio State's
                         annual hackathon. We designed a mouse that was controlled by hand movements
                         detected by a camera using machine learning and OpenCV.
                     </p>
-                    <a href="https://engineering.osu.edu/news/2022/01/students-companies-win-annual-hackathon"
-                        class="btn btn-primary my-2">Ohio State Article</a>
-                    <a href="https://www.youtube.com/watch?v=pRlvAiDeTYM" class="btn btn-primary">Project Video</a>
+                    <p class="card-text" style="margin: 0px;">
+                        <strong>Article:</strong> <a
+                            href="https://engineering.osu.edu/news/2022/01/students-companies-win-annual-hackathon">Link</a>
+                        <br>
+                        <strong>Demo Video:</strong> <a href="https://www.youtube.com/watch?v=pRlvAiDeTYM">Link</a>
+                    </p>
                 </div>
             </div>
-            <div class="card my-3 mx-3" style="max-width: 260px;">
+            <div class="card my-1 mb-3 cv-card">
                 <div class="card-body">
                     <h5 class="card-title">KGPU</h5>
                     <p class="card-text">
                         I am the creator of kgpu, a library that provides Kotlin bindings to
                         the WebGPU API on the Web and on the Desktop.
                     </p>
-                    <a href="https://www.github.com/kgpu/kgpu" class="btn btn-primary">GitHub Repo</a>
+                    <p class="card-text" style="margin: 0px;">
+                        <strong>GitHub Repo: </strong><a href="https://www.github.com/kgpu/kgpu">Link</a>
+                    </p>
                 </div>
             </div>
         </div>
